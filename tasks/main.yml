@@ -1,0 +1,24 @@
+---
+# tasks file for kevensen.cfme-ocp-manager
+
+- name: CFME OCP Manager | Get Management Infra Token
+  shell: oc sa get-token -n management-infra management-admin
+  with_items: "{{ groups['oc'] }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  register: ocp_token
+
+- name: CFME OCP Manager | Add Container Provider to CFME
+  uri:
+    url: "{{ cfme_api_url}}:{{ cfme_api_port }}/api/providers"
+    user: "{{ cfme_user }}"
+    password: "{{ cfme_password }}"
+    validate_certs: "{{ cfme_validate_certs }}"
+    body_format: json
+    body: "{\"type\" : \"ManageIQ::Providers::Openshift::ContainerManager\",\"name\" : \"local\",\"hostname\" : \"{{ hostvars[item.0][\'inventory_hostname\'] }}\",\"credentials\" : {\"auth_key\" : \"{{ item.1[\'stdout\'] }}\", \"auth_type\" : \"bearer\" }, \"security_protocol\" : \"{{ ssl_validate_provider }}\"}"
+    method: POST
+  no_log: true
+  register: result
+  with_together:
+  - "{{ groups['oc'] }}"
+  - "{{ ocp_token.results }}"

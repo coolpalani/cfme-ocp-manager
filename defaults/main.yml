@@ -1,0 +1,9 @@
+---
+# defaults file for kevensen.cfme-ocp-manager
+cfme_user: admin
+cfme_password: smartvm
+cfme_api_url: https://localhost
+cfme_api_port: 443
+cfme_validate_certs: False
+# options are ssl-without-validation or ssl-with-validation
+ssl_validate_provider: ssl-without-validation
